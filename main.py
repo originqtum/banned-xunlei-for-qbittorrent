@@ -1,22 +1,3 @@
-# banned-xunlei-for-qbittorrent
-python qbittorrent xunlei banned
-
-## 功能
-屏蔽迅雷客户端,每隔3秒运行一次. 可配置需要屏蔽的客户端
-
-## 屏蔽列表
--XL0012-***  
-Xunlei/***  
-7.x.x.x
-
-## 开发测试环境如下
-1. 需要安装 Python 3.8
-2. qbittorrent v4.1.9.1
-3. 开启webui
-4. 运行 python.exe main.py
-
-## 脚本
-```python
 import requests
 import json
 import time
@@ -184,17 +165,3 @@ if __name__ == "__main__":
 
         # 3秒执行一次
         time.sleep(3)
-
-```
-## 日志
-检测到新的连接时
-```
-find new client: *.*.*.*		Xunlei 0.0.1.8
-find new client: *.*.*.*		-XL0012-#�����Q���
-find new client: *.*.*.*		-XL0012-^ȕ�Dm�[ǏW
-find new client: *.*.*.*		-XL0012-����d+5ۆ�t
-find new client: *.*.*.*		-XL0012-�_���c�`F݋
-find new client: *.*.*.*		-XL0012-}[���W�Q��
-find new client: *.*.*.*		-XL0012-,���|�����2�
-...
-```
