@@ -2,7 +2,8 @@
 python qbittorrent xunlei banned
 
 ## 功能
-屏蔽迅雷客户端,每隔3秒运行一次. 可配置需要屏蔽的客户端
+屏蔽迅雷客户端,每隔3秒运行一次. 可配置需要屏蔽的客户端<br>
+自动下载tracker服务器列表并设置到qbittorrent
 
 ## 屏蔽列表
 -XL0012-***  
@@ -11,7 +12,7 @@ Xunlei/***
 
 ## 开发测试环境如下
 1. 需要安装 Python 3.8
-2. qbittorrent v4.1.9.1
+2. qbittorrent v4.1.9.1-v4.2.0
 3. 开启webui
 4. 运行 python.exe main.py
 
@@ -23,6 +24,8 @@ import time
 import random
 import math
 import string
+
+from requests import RequestException
 
 
 def getDownloadItem(url, cookie):
@@ -111,6 +114,25 @@ def notExistIp(existFilerClient, ipsCollect):
     return newAddList
 
 
+def loadTrackerByGithubAndSetting(url, cookie):
+    github_headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,'
+                  'application/signed-exchange;v=b3 ',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/78.0.3904.108 Safari/537.36 ',
+        'Accept-Encoding': 'gzip, deflate, br',
+    }
+    # 10秒超时设置
+    rsp = requests.get(github_user_content_url, headers=github_headers, timeout=10)
+    trackers = str(rsp.content, 'utf-8')
+    # print(trackers)
+
+    reload = {'add_trackers_enabled': True, 'add_trackers': trackers}
+    content = {'json': json.dumps(reload, ensure_ascii=False)}
+
+    requests.post(url, content, headers=headers, cookies=cookie)
+
+
 if __name__ == "__main__":
     # 定义需要过滤的客户端 name区分大小写 findType 1包含匹配 2前缀匹配
     filterClient = [
@@ -120,9 +142,10 @@ if __name__ == "__main__":
         {'name': 'QQDownload', 'findType': 1},
         {'name': '7.', 'findType': 2}
     ]
+    github_user_content_url = 'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt'
 
     # 将过滤的ip写入文件
-    fileAddress = r'C:\ipfilter.dat'
+    fileAddress = r'I:\Program Files\qBittorrent\ipfilter.dat'
     # webUi访问地址
     Root_url = 'http://127.0.0.1:1000'
     # 登陆接口
@@ -159,10 +182,17 @@ if __name__ == "__main__":
     if response.text != 'Ok.':
         exit(0)
 
+    cookie_jar = response.cookies
+    try:
+        loadTrackerByGithubAndSetting(filter_url, cookie_jar)
+    except RequestException:
+        print('加载tracker服务器列表---失败')
+    else:
+        print('加载tracker服务器列表---成功')
     # 进入循环运行
-    while True:
-        cookie_jar = response.cookies
 
+    print('过滤器成功运行中...')
+    while True:
         downItem = getDownloadItem(mainData_url, cookie_jar)
         downloadList = []
         for torrent in downItem:
