@@ -61,7 +61,10 @@ def getAllFilerClient(itemsHash, url, cookie):
 
 
 def isNeedBlockClient(peer):
-    client = peer['client']
+    client = peer.get('client')
+    if client is None:
+        return False
+
     for deFilter in filterClient:
         if deFilter['findType'] == 1 and client.find(deFilter['name']) > -1:
             return True
